@@ -5,15 +5,20 @@
 // make filter for orientation
 Madgwick filter;
 
+//accel related variable
 long accelX, accelY, accelZ;
 float gForceX, gForceY, gForceZ;
 
+//gyro related variable
+long gyro_x_cal, gyro_y_cal, gyro_z_cal;
 long gyroX, gyroY, gyroZ;
 float rotX, rotY, rotZ;
 
+//oritation related variable
 float roll,pitch,heading;
 
-unsigned long microsPerReading, microsPrevious;// count sample rate
+// count sample rate
+unsigned long microsPerReading, microsPrevious;
 
 // PID library setup
 double SetpointRoll = 0.0;
@@ -28,6 +33,17 @@ void setup() {
   // turn on PID
   rollPID.SetMode(AUTOMATIC);
   rollPID.SetOutputLimits(-360.0,360.0);
+  // 加速度计校准
+  for (int cal_int = 0; cal_int < 2000 ; cal_int ++){                  //Run this code 2000 times
+    recordGyroRegistersForSetUp();                                     //Read the raw acc and gyro data from the MPU-6050
+    gyro_x_cal += gyroX;                                              //Add the gyro x-axis offset to the gyro_x_cal variable
+    gyro_y_cal += gyroY;                                              //Add the gyro y-axis offset to the gyro_y_cal variable
+    gyro_z_cal += gyroZ;                                              //Add the gyro z-axis offset to the gyro_z_cal variable
+  }
+  gyro_x_cal /= 2000;                                                  //Divide the gyro_x_cal variable by 2000 to get the avarage offset
+  gyro_y_cal /= 2000;                                                  //Divide the gyro_y_cal variable by 2000 to get the avarage offset
+  gyro_z_cal /= 2000;                                                  //Divide the gyro_z_cal variable by 2000 to get the avarage offset
+  
   // always at last line
   microsPerReading = 1000000 / 25;
   microsPrevious = micros();
@@ -98,6 +114,17 @@ void processAccelData(){
   gForceY = accelY / 16384.0; 
   gForceZ = accelZ / 16384.0;
 }
+// read gyro for setup caliberation
+void recordGyroRegistersForSetUp(){
+  Wire.beginTransmission(0b1101000); //I2C address of the MPU
+  Wire.write(0x43); //Starting register for Gyro Readings
+  Wire.endTransmission();
+  Wire.requestFrom(0b1101000,6); //Request Gyro Registers (43 - 48)
+  while(Wire.available() < 6);
+  gyroX = Wire.read()<<8|Wire.read(); //Store first two bytes into accelX
+  gyroY = Wire.read()<<8|Wire.read(); //Store middle two bytes into accelY
+  gyroZ = Wire.read()<<8|Wire.read(); //Store last two bytes into accelZ
+}
 
 // get gyro data
 void recordGyroRegisters() {
@@ -114,6 +141,9 @@ void recordGyroRegisters() {
 
 // process gyro data
 void processGyroData() {
+  gyroX -= gyro_x_cal;
+  gyroY -= gyro_y_cal;                                                
+  gyroZ -= gyro_z_cal;
   rotX = gyroX / 131.0;
   rotY = gyroY / 131.0; 
   rotZ = gyroZ / 131.0;
