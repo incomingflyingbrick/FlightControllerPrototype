@@ -1,3 +1,4 @@
+#include <Servo.h>
 #include <Wire.h>
 #include <MadgwickAHRS.h>
 #include <PID_v1.h>
@@ -22,17 +23,31 @@ unsigned long microsPerReading, microsPrevious;
 
 // PID library setup
 double SetpointRoll = 0.0;
-double InputRoll, OutputRoll;
-PID rollPID(&InputRoll, &OutputRoll, &SetpointRoll,0.67,2.5,0.37, DIRECT);
+double SetpointPitch = 0.0;
+double InputRoll, OutputRoll,InputPitch,OutputPitch;
+
+PID rollPID(&InputRoll, &OutputRoll, &SetpointRoll,1,0,0, DIRECT);
+PID pitchPID(&InputPitch, &OutputPitch, &SetpointPitch,1,0,0, DIRECT);
+// servo setup
+Servo servoX; Servo servoY; 
+
+
 
 void setup() {
+  // attach servo X and Y
+  servoX.attach(6); // roll control
+  servoY.attach(7); // pitch control
+  servoX.write(85);
+  servoY.write(85);
   Serial.begin(9600);
   Wire.begin();
   setupMPU();
   filter.begin(25);
   // turn on PID
   rollPID.SetMode(AUTOMATIC);
-  rollPID.SetOutputLimits(-360.0,360.0);
+  rollPID.SetOutputLimits(-5,5);
+  pitchPID.SetMode(AUTOMATIC);
+  pitchPID.SetOutputLimits(-5,5);
   // 加速度计校准
   for (int cal_int = 0; cal_int < 2000 ; cal_int ++){                  //Run this code 2000 times
     recordGyroRegistersForSetUp();                                     //Read the raw acc and gyro data from the MPU-6050
@@ -47,10 +62,12 @@ void setup() {
   // always at last line
   microsPerReading = 1000000 / 25;
   microsPrevious = micros();
+
+  
 }
 
 
-void loop() {
+void loop() { // pitch is Y, roll is X
   unsigned long microsNow;
   microsNow = micros();
   if(microsNow - microsPrevious >= microsPerReading){
@@ -62,10 +79,26 @@ void loop() {
     pitch = filter.getPitch();
     heading = filter.getYaw();
     InputRoll = roll;
+    InputPitch = pitch;
+    
     rollPID.Compute();
+    pitchPID.Compute();
     printOritation();
+    
+
+    
+    servoX.write(85+OutputRoll);  
+    delay(20);
+    servoY.write(85+OutputPitch);
+    delay(20);
+    
   }
 }
+
+
+
+
+
 
 //print roll pitch yaw and PID
 void printOritation(){
