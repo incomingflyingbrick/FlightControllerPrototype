@@ -45,9 +45,9 @@ void setup() {
   filter.begin(25);
   // turn on PID
   rollPID.SetMode(AUTOMATIC);
-  rollPID.SetOutputLimits(-5,5);
+  rollPID.SetOutputLimits(-10,10);
   pitchPID.SetMode(AUTOMATIC);
-  pitchPID.SetOutputLimits(-5,5);
+  pitchPID.SetOutputLimits(-10,10);
   // 加速度计校准
   for (int cal_int = 0; cal_int < 2000 ; cal_int ++){                  //Run this code 2000 times
     recordGyroRegistersForSetUp();                                     //Read the raw acc and gyro data from the MPU-6050
@@ -85,13 +85,9 @@ void loop() { // pitch is Y, roll is X
     pitchPID.Compute();
     printOritation();
     
-
-    
     servoX.write(85+OutputRoll);  
-    delay(20);
     servoY.write(85+OutputPitch);
     delay(20);
-    
   }
 }
 
