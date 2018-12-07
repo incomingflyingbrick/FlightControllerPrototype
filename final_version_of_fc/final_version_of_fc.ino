@@ -26,12 +26,10 @@ double SetpointRoll = 0.0;
 double SetpointPitch = 0.0;
 double InputRoll, OutputRoll,InputPitch,OutputPitch;
 
-PID rollPID(&InputRoll, &OutputRoll, &SetpointRoll,1,0,0, DIRECT);
-PID pitchPID(&InputPitch, &OutputPitch, &SetpointPitch,1,0,0, DIRECT);
+PID rollPID(&InputRoll, &OutputRoll, &SetpointRoll,5,1,1, DIRECT);
+PID pitchPID(&InputPitch, &OutputPitch, &SetpointPitch,5,1,1, DIRECT);
 // servo setup
 Servo servoX; Servo servoY; 
-
-
 
 void setup() {
   // attach servo X and Y
@@ -42,12 +40,12 @@ void setup() {
   Serial.begin(9600);
   Wire.begin();
   setupMPU();
-  filter.begin(25);
+  
   // turn on PID
   rollPID.SetMode(AUTOMATIC);
-  rollPID.SetOutputLimits(-10,10);
+  rollPID.SetOutputLimits(-360,360);
   pitchPID.SetMode(AUTOMATIC);
-  pitchPID.SetOutputLimits(-10,10);
+  pitchPID.SetOutputLimits(-360,360);
   // 加速度计校准
   for (int cal_int = 0; cal_int < 2000 ; cal_int ++){                  //Run this code 2000 times
     recordGyroRegistersForSetUp();                                     //Read the raw acc and gyro data from the MPU-6050
@@ -58,12 +56,11 @@ void setup() {
   gyro_x_cal /= 2000;                                                  //Divide the gyro_x_cal variable by 2000 to get the avarage offset
   gyro_y_cal /= 2000;                                                  //Divide the gyro_y_cal variable by 2000 to get the avarage offset
   gyro_z_cal /= 2000;                                                  //Divide the gyro_z_cal variable by 2000 to get the avarage offset
-  
-  // always at last line
+  //setup filter setup sample rate of IMU data to 25Hz
+  filter.begin(25);
+  //always at last line 25Hz for the filter
   microsPerReading = 1000000 / 25;
   microsPrevious = micros();
-
-  
 }
 
 
@@ -80,28 +77,37 @@ void loop() { // pitch is Y, roll is X
     heading = filter.getYaw();
     InputRoll = roll;
     InputPitch = pitch;
-    
-    rollPID.Compute();
-    pitchPID.Compute();
-    printOritation();
-    
-    servoX.write(85+OutputRoll);  
-    servoY.write(85+OutputPitch);
-    delay(20);
+    Serial.print("Orientation: ");
+    Serial.print(heading);
+    Serial.print(" ");
+    Serial.print(pitch);
+    Serial.print(" ");
+    Serial.println(roll);
+    //rollPID.Compute();
+    //pitchPID.Compute();
+    //printOritation();
+//    Serial.print("Roll:");
+//    Serial.print(roll);
+//    Serial.print(" RollPID:");
+//    Serial.print(OutputRoll);
+//    Serial.print(" Pitch:");
+//    Serial.println(pitch);
+//    Serial.print(" PitchPID:");
+//    Serial.println(OutputPitch);
+    //delay(100);
+    //servoX.write(85+OutputRoll);  
+    //delay(15);
+    //servoY.write(85+OutputPitch);
+    //delay(15);
+    microsPrevious = microsPrevious + microsPerReading; // very imporant line
   }
 }
-
-
-
-
 
 
 //print roll pitch yaw and PID
 void printOritation(){
   Serial.print("Roll:");
   Serial.print(roll);
-  Serial.print(" Roll PID:");
-  Serial.print(OutputRoll);
   Serial.print(" Pitch:");
   Serial.print(pitch);
   Serial.print(" Yaw:");
