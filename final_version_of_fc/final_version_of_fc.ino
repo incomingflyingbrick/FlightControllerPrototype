@@ -26,8 +26,8 @@ double SetpointRoll = 0.0;
 double SetpointPitch = 0.0;
 double InputRoll, OutputRoll,InputPitch,OutputPitch;
 
-PID rollPID(&InputRoll, &OutputRoll, &SetpointRoll,5,1,1, DIRECT);
-PID pitchPID(&InputPitch, &OutputPitch, &SetpointPitch,5,1,1, DIRECT);
+PID rollPID(&InputRoll, &OutputRoll, &SetpointRoll,1,0,0, DIRECT);
+PID pitchPID(&InputPitch, &OutputPitch, &SetpointPitch,1,0,0, DIRECT);
 // servo setup
 Servo servoX; Servo servoY; 
 
@@ -42,10 +42,11 @@ void setup() {
   setupMPU();
   
   // turn on PID
+  rollPID.SetOutputLimits(-10,10);
   rollPID.SetMode(AUTOMATIC);
-  rollPID.SetOutputLimits(-360,360);
+  pitchPID.SetOutputLimits(-10,10);
   pitchPID.SetMode(AUTOMATIC);
-  pitchPID.SetOutputLimits(-360,360);
+  
   // 加速度计校准
   for (int cal_int = 0; cal_int < 2000 ; cal_int ++){                  //Run this code 2000 times
     recordGyroRegistersForSetUp();                                     //Read the raw acc and gyro data from the MPU-6050
@@ -77,28 +78,12 @@ void loop() { // pitch is Y, roll is X
     heading = filter.getYaw();
     InputRoll = roll;
     InputPitch = pitch;
-    Serial.print("Orientation: ");
-    Serial.print(heading);
-    Serial.print(" ");
-    Serial.print(pitch);
-    Serial.print(" ");
-    Serial.println(roll);
-    //rollPID.Compute();
-    //pitchPID.Compute();
-    //printOritation();
-//    Serial.print("Roll:");
-//    Serial.print(roll);
-//    Serial.print(" RollPID:");
-//    Serial.print(OutputRoll);
-//    Serial.print(" Pitch:");
-//    Serial.println(pitch);
-//    Serial.print(" PitchPID:");
-//    Serial.println(OutputPitch);
-    //delay(100);
-    //servoX.write(85+OutputRoll);  
-    //delay(15);
-    //servoY.write(85+OutputPitch);
-    //delay(15);
+    rollPID.Compute();
+    pitchPID.Compute();
+    printOritation();
+    servoX.write(85+OutputRoll); 
+    servoY.write(85+OutputPitch);
+    delay(15);
     microsPrevious = microsPrevious + microsPerReading; // very imporant line
   }
 }
