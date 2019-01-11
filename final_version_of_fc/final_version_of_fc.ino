@@ -90,12 +90,12 @@ void loop()
     heading = filter.getYaw();
     InputRoll = roll;
     InputPitch = pitch;
-    //    rollPID.Compute();
-    //    pitchPID.Compute();
+    rollPID.Compute();
+    pitchPID.Compute();
     printOritation();
-    //    servoX.write(85+OutputRoll);
-    //    servoY.write(85+OutputPitch);
-    //    delay(20);
+    servoX.write(85 + OutputRoll);
+    servoY.write(85 + OutputPitch);
+    delay(20);
     if (imuService.freeFallDetection)
     {
       digitalWrite(LED_BUILTIN, LOW);
