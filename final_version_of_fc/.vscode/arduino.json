@@ -1,0 +1,5 @@
+{
+    "board": "arduino:avr:uno",
+    "port": "/dev/cu.usbmodem14201",
+    "sketch": "final_version_of_fc.ino"
+}

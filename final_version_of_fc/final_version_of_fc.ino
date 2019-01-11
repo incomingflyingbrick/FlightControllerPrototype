@@ -96,12 +96,13 @@ void loop()
     servoX.write(85 + OutputRoll);
     servoY.write(85 + OutputPitch);
     delay(20);
-    if (imuService.freeFallDetection)
+    if (imuService.freeFallDetection(gForceX, gForceY, gForceZ))
     {
-      digitalWrite(LED_BUILTIN, LOW);
+      digitalWrite(LED_BUILTIN, HIGH);
     }
     microsPrevious = microsPrevious + microsPerReading; // very imporant line
   }
+  
 }
 
 //print roll pitch yaw and PID
