@@ -3,6 +3,10 @@
 #include <MadgwickAHRS.h>
 #include <PID_v1.h>
 
+
+// LED
+int LED_PIN = 13;
+
 // make filter for orientation
 Madgwick filter;
 
@@ -42,9 +46,9 @@ void setup() {
   setupMPU();
   
   // turn on PID
-  rollPID.SetOutputLimits(-10,10);
+  rollPID.SetOutputLimits(-20,20);
   rollPID.SetMode(AUTOMATIC);
-  pitchPID.SetOutputLimits(-10,10);
+  pitchPID.SetOutputLimits(-20,20);
   pitchPID.SetMode(AUTOMATIC);
   
   // 加速度计校准
@@ -63,7 +67,8 @@ void setup() {
   microsPerReading = 1000000 / 25;
   microsPrevious = micros();
 }
-
+// for plane X axis is PITCH, Y is ROll, Z is yaw
+// 
 
 void loop() { // pitch is Y, roll is X
   unsigned long microsNow;
@@ -78,13 +83,15 @@ void loop() { // pitch is Y, roll is X
     heading = filter.getYaw();
     InputRoll = roll;
     InputPitch = pitch;
-    rollPID.Compute();
-    pitchPID.Compute();
+//    rollPID.Compute();
+//    pitchPID.Compute();
     printOritation();
-    servoX.write(85+OutputRoll); 
-    servoY.write(85+OutputPitch);
-    delay(15);
+//    servoX.write(85+OutputRoll); 
+//    servoY.write(85+OutputPitch);
+//    delay(20);
+    
     microsPrevious = microsPrevious + microsPerReading; // very imporant line
+    
   }
 }
 
@@ -134,6 +141,7 @@ void processAccelData(){
   gForceY = accelY / 16384.0; 
   gForceZ = accelZ / 16384.0;
 }
+
 // read gyro for setup caliberation
 void recordGyroRegistersForSetUp(){
   Wire.beginTransmission(0b1101000); //I2C address of the MPU
