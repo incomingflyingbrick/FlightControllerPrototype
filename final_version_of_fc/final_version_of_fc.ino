@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <MadgwickAHRS.h>
 #include <PID_v1.h>
-
+#include "IMUService.h"
 
 // LED
 int LED_PIN = 13;
@@ -34,6 +34,8 @@ PID rollPID(&InputRoll, &OutputRoll, &SetpointRoll,1,0,0, DIRECT);
 PID pitchPID(&InputPitch, &OutputPitch, &SetpointPitch,1,0,0, DIRECT);
 // servo setup
 Servo servoX; Servo servoY; 
+
+IMUService imuService;
 
 void setup() {
   // attach servo X and Y
@@ -89,7 +91,9 @@ void loop() { // pitch is Y, roll is X
 //    servoX.write(85+OutputRoll); 
 //    servoY.write(85+OutputPitch);
 //    delay(20);
-    
+    if(imuService.freeFallDetection){
+      
+    }
     microsPrevious = microsPrevious + microsPerReading; // very imporant line
     
   }
