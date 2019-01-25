@@ -23,7 +23,7 @@ float roll, pitch, heading;
 unsigned long microsPerReading, microsPrevious;
 
 // PID library setup
-double SetpointRoll = 0.0;
+double SetpointRoll = 90;// roll should be 90 when IMU is standing
 double SetpointPitch = 0.0;
 double InputRoll, OutputRoll, InputPitch, OutputPitch;
 
@@ -73,10 +73,10 @@ void setup()
   microsPrevious = micros();
 }
 // for plane X axis is PITCH, Y is ROll, Z is yaw
-//
 
 void loop()
-{ // pitch is Y, roll is X
+{
+  // pitch is Y, roll is X
   unsigned long microsNow;
   microsNow = micros();
   if (microsNow - microsPrevious >= microsPerReading)
@@ -95,14 +95,13 @@ void loop()
     printOritation();
     servoX.write(85 + OutputRoll);
     servoY.write(85 + OutputPitch);
-    delay(20);
-    if (imuService.freeFallDetection(gForceX, gForceY, gForceZ))
+    //delay(20);
+    if (imuService.freeFallDetection(gForceX, gForceY, gForceZ)) // free fall detection
     {
       digitalWrite(LED_BUILTIN, HIGH);
     }
-    microsPrevious = microsPrevious + microsPerReading; // very imporant line
+    microsPrevious = microsPrevious + microsPerReading; // very imporant line, do not remove
   }
-  
 }
 
 //print roll pitch yaw and PID
