@@ -1,5 +1,6 @@
 #include <math.h>
 #include "IMUService.h"
+#include <Wire.h>
 
 bool IMUService::freeFallDetection(float gForceX, float gForceY, float gForceZ)
 {
@@ -10,3 +11,4 @@ bool IMUService::freeFallDetection(float gForceX, float gForceY, float gForceZ)
     }
     return false;
 }
+

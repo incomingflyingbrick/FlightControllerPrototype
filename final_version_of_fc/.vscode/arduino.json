@@ -1,5 +1,6 @@
 {
-    "board": "arduino:avr:uno",
-    "port": "/dev/cu.usbmodem14201",
-    "sketch": "final_version_of_fc.ino"
+    "board": "arduino:sam:arduino_due_x_dbg",
+    "port": "/dev/cu.usbmodem14101",
+    "sketch": "fc.ino",
+    "programmer": "AVRISP mkII"
 }
