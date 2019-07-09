@@ -4,8 +4,12 @@
 #include <MadgwickAHRS.h>
 #include <Arduino.h>
 
-IMUService::IMUService()
+IMUService::IMUService(int rate)// should be called in setup part
 {
+    refreshRate = rate;
+}
+
+void IMUService::prepare(){
     setupIMU();
     // 加速度计校准,2000次取值,然后去平均值
     for (int cal_int = 0; cal_int < 2000; cal_int++)
@@ -22,11 +26,19 @@ IMUService::IMUService()
     microsPrevious = micros();
 }
 
-void IMUService::loop(){
+
+void IMUService::loop()
+{
     unsigned long microsNow;
     microsNow = micros();
-    if(microsNow - microsPrevious >= microsPerReading){
+    if (microsNow - microsPrevious >= microsPerReading)
+    {
         filter.updateIMU(rotX, rotY, rotZ, gForceX, gForceY, gForceZ);
+        roll = filter.getRoll();
+        pitch = filter.getPitch();
+        heading = filter.getYaw();
+        // increment previous time, so we keep proper pace
+        microsPrevious = microsPrevious + microsPerReading;
     }
 }
 
@@ -39,7 +51,6 @@ bool IMUService::freeFallDetection(float gForceX, float gForceY, float gForceZ)
     }
     return false;
 }
-
 
 float IMUService::getRoll()
 {
@@ -56,6 +67,7 @@ float IMUService::getYaw()
 
 void IMUService::setupIMU()
 {
+    Wire.begin();
     Wire.beginTransmission(0b1101000); //This is the I2C address of the MPU (b1101000/b1101001 for AC0 low/high datasheet sec. 9.2)
     Wire.write(0x6B);                  //Accessing the register 6B - Power Management (Sec. 4.28)
     Wire.write(0b00000000);            //Setting SLEEP register to 0. (Required; see Note on p. 9)
@@ -87,65 +99,75 @@ void IMUService::recordGyroRegistersForSetUp()
 // get accel data
 void IMUService::recordAccelRegisters()
 {
-  Wire.beginTransmission(0b1101000); //I2C address of the MPU
-  Wire.write(0x3B);                  //Starting register for Accel Readings
-  Wire.endTransmission();
-  Wire.requestFrom(0b1101000, 6); //Request Accel Registers (3B - 40)
-  while (Wire.available() < 6)
-    ;
-  accelX = Wire.read() << 8 | Wire.read(); //Store first two bytes into accelX
-  accelY = Wire.read() << 8 | Wire.read(); //Store middle two bytes into accelY
-  accelZ = Wire.read() << 8 | Wire.read(); //Store last two bytes into accelZ
-  processAccelData();
+    Wire.beginTransmission(0b1101000); //I2C address of the MPU
+    Wire.write(0x3B);                  //Starting register for Accel Readings
+    Wire.endTransmission();
+    Wire.requestFrom(0b1101000, 6); //Request Accel Registers (3B - 40)
+    while (Wire.available() < 6)
+        ;
+    accelX = Wire.read() << 8 | Wire.read(); //Store first two bytes into accelX
+    accelY = Wire.read() << 8 | Wire.read(); //Store middle two bytes into accelY
+    accelZ = Wire.read() << 8 | Wire.read(); //Store last two bytes into accelZ
+    processAccelData();
 }
 
 // get gyro data
 void IMUService::recordGyroRegisters()
 {
-  Wire.beginTransmission(0b1101000); //I2C address of the MPU
-  Wire.write(0x43);                  //Starting register for Gyro Readings
-  Wire.endTransmission();
-  Wire.requestFrom(0b1101000, 6); //Request Gyro Registers (43 - 48)
-  while (Wire.available() < 6)
-    ;
-  gyroX = Wire.read() << 8 | Wire.read(); //Store first two bytes into accelX
-  gyroY = Wire.read() << 8 | Wire.read(); //Store middle two bytes into accelY
-  gyroZ = Wire.read() << 8 | Wire.read(); //Store last two bytes into accelZ
-  processGyroData();
+    Wire.beginTransmission(0b1101000); //I2C address of the MPU
+    Wire.write(0x43);                  //Starting register for Gyro Readings
+    Wire.endTransmission();
+    Wire.requestFrom(0b1101000, 6); //Request Gyro Registers (43 - 48)
+    while (Wire.available() < 6)
+        ;
+    gyroX = Wire.read() << 8 | Wire.read(); //Store first two bytes into accelX
+    gyroY = Wire.read() << 8 | Wire.read(); //Store middle two bytes into accelY
+    gyroZ = Wire.read() << 8 | Wire.read(); //Store last two bytes into accelZ
+    processGyroData();
 }
 
 void IMUService::processAccelData()
 {
-  gForceX = accelX / 16384.0;
-  gForceY = accelY / 16384.0;
-  gForceZ = accelZ / 16384.0;
+    gForceX = accelX / 16384.0;
+    gForceY = accelY / 16384.0;
+    gForceZ = accelZ / 16384.0;
 }
 
 // process gyro data
 void IMUService::processGyroData()
 {
-  gyroX -= gyro_x_cal;
-  gyroY -= gyro_y_cal;
-  gyroZ -= gyro_z_cal;
-  rotX = gyroX / 131.0;
-  rotY = gyroY / 131.0;
-  rotZ = gyroZ / 131.0;
+    gyroX -= gyro_x_cal;
+    gyroY -= gyro_y_cal;
+    gyroZ -= gyro_z_cal;
+    rotX = gyroX / 131.0;
+    rotY = gyroY / 131.0;
+    rotZ = gyroZ / 131.0;
 }
 
 void IMUService::printData()
 {
-  Serial.print("Gyro (deg)");
-  Serial.print(" X=");
-  Serial.print(rotX);
-  Serial.print(" Y=");
-  Serial.print(rotY);
-  Serial.print(" Z=");
-  Serial.print(rotZ);
-  Serial.print(" Accel (g)");
-  Serial.print(" X=");
-  Serial.print(gForceX);
-  Serial.print(" Y=");
-  Serial.print(gForceY);
-  Serial.print(" Z=");
-  Serial.println(gForceZ);
+    Serial.print("Gyro (deg)");
+    Serial.print(" X=");
+    Serial.print(rotX);
+    Serial.print(" Y=");
+    Serial.print(rotY);
+    Serial.print(" Z=");
+    Serial.print(rotZ);
+    Serial.print(" Accel (g)");
+    Serial.print(" X=");
+    Serial.print(gForceX);
+    Serial.print(" Y=");
+    Serial.print(gForceY);
+    Serial.print(" Z=");
+    Serial.println(gForceZ);
+}
+
+void IMUService::printOritation()
+{
+  Serial.print("Roll:");
+  Serial.print(roll);
+  Serial.print(" Pitch:");
+  Serial.print(pitch);
+  Serial.print(" Yaw:");
+  Serial.println(heading);
 }

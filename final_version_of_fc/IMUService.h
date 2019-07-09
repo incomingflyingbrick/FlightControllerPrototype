@@ -9,21 +9,24 @@ public:
   float getRoll();
   float getPitch();
   float getYaw();
-  void setupIMU();
   void loop();
-  IMUService();
-  unsigned long microsPerReading = 1000000 / 25; // 25Hz 读取数据频率
-  unsigned long microsPrevious;
+  void prepare();
+  IMUService(int rate);
+  
 
 private:
+  void setupIMU();
   Madgwick filter;
   void recordGyroRegistersForSetUp();
   int refreshRate = 25;
+  unsigned long microsPerReading = 1000000 / refreshRate; // 25Hz 读取数据频率
+  unsigned long microsPrevious;
   void recordAccelRegisters();
   void recordGyroRegisters();
   void processAccelData();
   void processGyroData();
   void printData();
+  void printOritation();
   //accel related variable
   long accelX, accelY, accelZ;
   float gForceX, gForceY, gForceZ;
