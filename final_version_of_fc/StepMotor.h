@@ -2,7 +2,6 @@
 
 class StepMotor
 {
-
 public:
     StepMotor(int dirPin, int pulsePin, int upLimit, int downLimit);
     void extend();
