@@ -26,7 +26,7 @@ void IMUService::loop(){
     unsigned long microsNow;
     microsNow = micros();
     if(microsNow - microsPrevious >= microsPerReading){
-        filter.updateIMU();
+        filter.updateIMU(rotX, rotY, rotZ, gForceX, gForceY, gForceZ);
     }
 }
 

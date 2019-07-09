@@ -18,10 +18,19 @@ public:
 private:
   Madgwick filter;
   void recordGyroRegistersForSetUp();
-  int refreshRate=25;
+  int refreshRate = 25;
   void recordAccelRegisters();
   void recordGyroRegisters();
   void processAccelData();
   void processGyroData();
   void printData();
+  //accel related variable
+  long accelX, accelY, accelZ;
+  float gForceX, gForceY, gForceZ;
+  //gyro related variable
+  long gyro_x_cal, gyro_y_cal, gyro_z_cal;
+  long gyroX, gyroY, gyroZ;
+  float rotX, rotY, rotZ;
+  //oritation related variable
+  float roll, pitch, heading;
 };
