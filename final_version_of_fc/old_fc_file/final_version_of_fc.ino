@@ -2,7 +2,6 @@
 #include <Wire.h>
 #include <MadgwickAHRS.h>
 #include <PID_v1.h>
-#include "IMUService.h"
 //#include "Temprature.h"
 // make filter for orientation
 Madgwick filter;
@@ -33,7 +32,6 @@ PID pitchPID(&InputPitch, &OutputPitch, &SetpointPitch, 1, 0, 0, DIRECT);
 Servo servoX;
 Servo servoY;
 
-IMUService imuService;
 //Temprature temp(21);
 
 void setup()

@@ -3,30 +3,30 @@
 #include <Arduino.h>
 
 
-StepMotor::StepMotor(int dirPin, int pulsePin, int upLimit, int downLimit){
-    this.pulsePin = pulsePin;
-    this.dirPin = dirPin;
-    this.upLimit = upLimit;
-    this.downLimit = downLimit;
-    stepper = AccelStepper(1,this.pulsePin,this,dirPin);
-    stepper->setMaxSpeed(2000);
+StepMotor::StepMotor(int dir, int pulse, int upLimit, int downLimit){
+    pulsePin = pulse;
+    dirPin = dir;
+    upLimitPin = upLimit;
+    downLimitPin = downLimit;
+    stepper = AccelStepper(1,pulsePin,dirPin);// use mode 1,which is motor driver
+    stepper.setMaxSpeed(2000);// no more than 2000 for speed
 }
 
 
 void StepMotor::extend(){
-    stepper->setSpeed(-1000);
+    stepper.setSpeed(1000);
 }
 
 void StepMotor::retract(){
-    stepper->setSpeed(-1000);
+    stepper.setSpeed(-1000);
 }
 
 void StepMotor::runSpeed(){
-    if(digitalRead(this.upLimit)==LOW||digitalRead(this.downLimit)==LOW){
-        stepper->stop();
+    if(digitalRead(upLimitPin)==LOW||digitalRead(downLimitPin)==LOW){
+        stepper.stop();
         return;
     }
-    stepper->runSpeed();
+    stepper.runSpeed();
 }
 
 

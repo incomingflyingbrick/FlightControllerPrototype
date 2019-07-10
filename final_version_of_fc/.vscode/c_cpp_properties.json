@@ -12,7 +12,7 @@
                 "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/**"
             ],
             "forcedInclude": [
-                "/Users/jiangyazhou/Library/Arduino15/packages/arduino/hardware/sam/1.6.12/cores/arduino/Arduino.h"
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino/Arduino.h"
             ],
             "macFrameworkPath": [
                 "/System/Library/Frameworks",

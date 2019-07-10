@@ -4,12 +4,13 @@
 #include <MadgwickAHRS.h>
 #include <Arduino.h>
 
-IMUService::IMUService(int rate)// should be called in setup part
+IMUService::IMUService(int rate) // should be called in setup part
 {
     refreshRate = rate;
 }
 
-void IMUService::prepare(){
+void IMUService::prepare()
+{
     setupIMU();
     // 加速度计校准,2000次取值,然后去平均值
     for (int cal_int = 0; cal_int < 2000; cal_int++)
@@ -26,18 +27,20 @@ void IMUService::prepare(){
     microsPrevious = micros();
 }
 
-
-void IMUService::loop()
+void IMUService::loopIMU()
 {
     unsigned long microsNow;
     microsNow = micros();
     if (microsNow - microsPrevious >= microsPerReading)
     {
+        recordAccelRegisters();
+        recordGyroRegisters();
         filter.updateIMU(rotX, rotY, rotZ, gForceX, gForceY, gForceZ);
         roll = filter.getRoll();
         pitch = filter.getPitch();
         heading = filter.getYaw();
-        // increment previous time, so we keep proper pace
+        printOritation();
+        //increment previous time, so we keep proper pace
         microsPrevious = microsPrevious + microsPerReading;
     }
 }
@@ -164,10 +167,10 @@ void IMUService::printData()
 
 void IMUService::printOritation()
 {
-  Serial.print("Roll:");
-  Serial.print(roll);
-  Serial.print(" Pitch:");
-  Serial.print(pitch);
-  Serial.print(" Yaw:");
-  Serial.println(heading);
+    Serial.print("Roll:");
+    Serial.print(roll);
+    Serial.print(" Pitch:");
+    Serial.print(pitch);
+    Serial.print(" Yaw:");
+    Serial.println(heading);
 }

@@ -1,11 +1,14 @@
-#include <Wire.h>
+#include "IMUService.h"
+
+IMUService imuService(25);
+
 void setup()
 {
-    Wire.begin();
+    Serial.begin(9600);
+    imuService.prepare();
 }
-// for plane X axis is PITCH, Y is ROll, Z is yaw
 
 void loop()
 {
-    
+    imuService.loopIMU();
 }

@@ -1,7 +1,6 @@
 #include <MadgwickAHRS.h>
 
-class IMUService
-{
+class IMUService{
 
 public:
   float freeFallThreshold = 0.25; // 0.2 g
@@ -9,7 +8,7 @@ public:
   float getRoll();
   float getPitch();
   float getYaw();
-  void loop();
+  void loopIMU();
   void prepare();
   IMUService(int rate);
   

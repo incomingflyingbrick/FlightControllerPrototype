@@ -1,5 +1,5 @@
 {
-    "board": "arduino:sam:arduino_due_x_dbg",
+    "board": "arduino:avr:uno",
     "port": "/dev/cu.usbmodem14101",
     "sketch": "fc.ino",
     "programmer": "AVRISP mkII"
